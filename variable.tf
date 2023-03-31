@@ -1,35 +1,48 @@
+variable "app_service_plan_name" {
+  type        = string
+  description = "Name of the App Service Plan"
+  default     = "my-app-service-plan"
+}
+
+variable "app_service_plan_tier" {
+  type        = string
+  description = "Tier of the App Service Plan"
+  default     = "Dynamic"
+}
+
+variable "app_service_plan_size" {
+  type        = string
+  description = "Size of the App Service Plan"
+  default     = "Y1"
+}
+
 variable "app_name" {
   type        = string
   description = "Name of the Function App"
   default     = "my-function-app"
 }
 
-variable "storage_account_name" {
+variable "location" {
   type        = string
-  description = "Name of the Storage Account"
-  default     = "bastestdevops"
+  description = "Location for the App Service Plan and Function App"
+  default     = "eastus"
 }
 
-variable "runtime" {
+variable "resource_group_name" {
   type        = string
-  description = "The language runtime to use for the Function App"
-  default     = "node"
+  description = "Name of the Resource Group"
+  default     = "my-resource-group"
 }
 
-variable "run_from_package" {
-  type        = string
-  description = "A URL or file path to a pre-built package to run the Function App from"
-  default     = null
-}
-
-variable "some_other_setting" {
-  type        = string
-  description = "Some other configuration setting to pass to the Function App"
-  default     = null
-}
-
-variable "linux_fx_version" {
-  type        = string
-  description = "The version of the Linux FX runtime to use"
-  default     = "DOCKER|<docker_image>"
+variable "app_settings" {
+  type        = map(string)
+  description = "App settings for the Function App"
+  default = {
+    FUNCTIONS_WORKER_RUNTIME             = "custom"
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE  = "false"
+    DOCKER_REGISTRY_SERVER_URL           = "https://index.docker.io"
+    WEBSITES_PORT                        = "80"
+    DOCKER_ENABLE_CI                     = "true"
+    DOCKER_CUSTOM_IMAGE_NAME             = "hello-world"
+  }
 }
