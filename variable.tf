@@ -4,28 +4,10 @@ variable "app_name" {
   default     = "my-function-app"
 }
 
-variable "location" {
-  type        = string
-  description = "Location for the Function App"
-  default     = "eastus"
-}
-
-variable "resource_group_name" {
-  type        = string
-  description = "Name of the Resource Group"
-  default     = "my-resource-group"
-}
-
-variable "app_service_plan_id" {
-  type        = string
-  description = "ID of the App Service Plan"
-  default     = "/subscriptions/<subscription_id>/resourceGroups/<resource_group_name>/providers/Microsoft.Web/serverFarms/<app_service_plan_name>"
-}
-
 variable "storage_account_name" {
   type        = string
   description = "Name of the Storage Account"
-  default     = "my-storage-account"
+  default     = "bastestdevops"
 }
 
 variable "runtime" {

@@ -1,8 +1,18 @@
+resource "azurerm_app_service_plan" "service_plan" {
+  name                = var.app_service_plan_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  sku {
+    tier = "Dynamic"
+    size = "Y1"
+  }
+}
+
 resource "azurerm_function_app" "example" {
   name                = var.app_name
   location            = var.location
-  resource_group_name = var.resource_group_name
-  app_service_plan_id = var.app_service_plan_id
+  resource_group_name = var.target_rg
+  app_service_plan_id = azurerm_app_service_plan.service_plan.id
   storage_account_name = var.storage_account_name
   os_type             = "Linux"
   version             = "~3"
