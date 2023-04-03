@@ -39,7 +39,9 @@ variable "app_settings" {
   description = "App settings for the Function App"
   default = {
   app_settings = {
-    WEBSITE_RUN_FROM_CONTAINER = "1"
-    WEBSITE_CONTAINER_IMAGE_NAME = "mcr.microsoft.com/azure-functions/node:3.0-appservice"
+    WEBSITE_RUN_FROM_PACKAGE        = "0"
+    WEBSITE_CONTAINER_IMAGE_NAME    = "docker.io/library/hello-world:latest"
+    FUNCTIONS_WORKER_RUNTIME        = "node"
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "true"
   }
 }
