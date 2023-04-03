@@ -38,11 +38,8 @@ variable "app_settings" {
   type        = map(string)
   description = "App settings for the Function App"
   default = {
-    FUNCTIONS_WORKER_RUNTIME             = "custom"
-    WEBSITES_ENABLE_APP_SERVICE_STORAGE  = "false"
-    DOCKER_REGISTRY_SERVER_URL           = "https://index.docker.io"
-    WEBSITES_PORT                        = "80"
-    DOCKER_ENABLE_CI                     = "true"
-    DOCKER_CUSTOM_IMAGE_NAME             = "hello-world"
+  app_settings = {
+    WEBSITE_RUN_FROM_CONTAINER = "1"
+    WEBSITE_CONTAINER_IMAGE_NAME = "mcr.microsoft.com/azure-functions/node:3.0-appservice"
   }
 }
