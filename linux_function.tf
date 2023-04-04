@@ -43,7 +43,7 @@ resource "azurerm_linux_function_app" "example" {
 
 data "azurerm_key_vault" "existing" {
   name                = "my-key-vault"
-  resource_group_name = "my-resource-group"
+  resource_group_name =  var.resource_group_name
 }
 
 # Get the storage account access key from the Azure Key Vault
@@ -52,8 +52,4 @@ data "azurerm_key_vault_secret" "storage_account_access_key" {
   key_vault_id = data.azurerm_key_vault.existing.id
 }
 
-# Get an existing storage account
-data "azurerm_storage_account" "existing" {
-  name                = "existing-storage-account-name"
-  resource_group_name = "existing-resource-group-name"
-}
+
