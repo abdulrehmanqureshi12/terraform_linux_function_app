@@ -36,6 +36,7 @@ resource "azurerm_linux_function_app" "fa" {
   storage_account_access_key = data.azurerm_storage_account.sa.primary_access_key
    https_only = true
   app_settings = {
+     "WEBSITE_LOAD_CERTIFICATES" = data.azurerm_key_vault_certificate.example.id
     FUNCTIONS_WORKER_RUNTIME    = "node"
     CONTAINER_REGISTRY_SERVER  = azurerm_container_registry.acr.login_server
     CONTAINER_REGISTRY_USERNAME = azurerm_container_registry.acr.admin_username
@@ -50,4 +51,14 @@ resource "azurerm_linux_function_app" "fa" {
     client_cert_enabled       = true
   }
   
+}
+
+data "azurerm_key_vault" "example" {
+  name                = "example-kv"
+  resource_group_name = "example-resource-group"
+}
+
+data "azurerm_key_vault_certificate" "example" {
+  name         = "example-cert"
+  key_vault_id = data.azurerm_key_vault.example.id
 }
