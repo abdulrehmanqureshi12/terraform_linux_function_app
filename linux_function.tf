@@ -1,55 +1,53 @@
-# Create an Azure App Service Plan
-resource "azurerm_app_service_plan" "service_plan" {
-  name                = var.app_service_plan_name
+data "azurerm_resource_group" "rg" {
+  name = "test"
+}
+
+# Define storage account data source
+data "azurerm_storage_account" "sa" {
+  name                = var.storage_account_name
+  resource_group_name = data.azurerm_resource_group.rg.name
+}
+
+# Create Azure Container Registry
+resource "azurerm_container_registry" "acr" {
+  name                = var.container_registry_name
+  resource_group_name = data.azurerm_resource_group.rg.name
   location            = var.location
-  resource_group_name = var.resource_group_name
-  sku {
-    tier = var.app_service_plan_tier
-    size = var.app_service_plan_size
+  sku                 = "Basic"
+}
+
+# Create App Service plan
+resource "azurerm_service_plan" "sp" {
+  name                = var.service_plan_name
+  location            = var.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+
+  sku_name = "Y1"
+  os_type = "Linux"
+}
+
+# Create Function App
+resource "azurerm_linux_function_app" "fa" {
+  name                      = var.function_app_name
+  location                  = var.location
+  resource_group_name       = data.azurerm_resource_group.rg.name
+  service_plan_id       = azurerm_service_plan.sp.id
+  storage_account_name      = data.azurerm_storage_account.sa.name
+  storage_account_access_key = data.azurerm_storage_account.sa.primary_access_key
+   https_only = true
+  app_settings = {
+    FUNCTIONS_WORKER_RUNTIME    = "node"
+    CONTAINER_REGISTRY_SERVER  = azurerm_container_registry.acr.login_server
+    CONTAINER_REGISTRY_USERNAME = azurerm_container_registry.acr.admin_username
+    CONTAINER_REGISTRY_PASSWORD = azurerm_container_registry.acr.admin_password
   }
+  client_certificate_enabled = true
+  site_config {
+    always_on                 = true
+    use_32_bit_worker_process = false
+    websockets_enabled        = false
+    https_only                = true
+    client_cert_enabled       = true
+  }
+  
 }
-
-# Create an Azure Linux Function App associated with the App Service Plan
-resource "azurerm_linux_function_app" "example" {
-  name                = var.app_name
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  app_service_plan_id = azurerm_app_service_plan.service_plan.id
-  app_settings        = var.app_settings
-}
-
-resource "azurerm_service_plan" "example" {
-  name                = "example-app-service-plan"
-  resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
-  os_type             = "Linux"
-  sku_name            = "Y1"
-}
-
-resource "azurerm_linux_function_app" "example" {
-  name                = "example-linux-function-app"
-  resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
-
-  storage_account_name       = azurerm_storage_account.example.name
-  storage_account_access_key = azurerm_storage_account.example.primary_access_key
-  service_plan_id            = azurerm_service_plan.example.id
-
-  site_config {}
-}
-
-
-
-
-data "azurerm_key_vault" "existing" {
-  name                = "my-key-vault"
-  resource_group_name =  var.resource_group_name
-}
-
-# Get the storage account access key from the Azure Key Vault
-data "azurerm_key_vault_secret" "storage_account_access_key" {
-  name         = "my-storage-account-access-key"
-  key_vault_id = data.azurerm_key_vault.existing.id
-}
-
-
