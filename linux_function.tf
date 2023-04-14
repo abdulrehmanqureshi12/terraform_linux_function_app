@@ -49,10 +49,7 @@ resource "azurerm_function_app" "function_app" {
 
   # Configure HTTPS with the custom domain and certificate
   site_config {
-    https_only       = true
-    min_tls_version  = "1.2"
-    client_cert_mode = "RequireCertificate"
-    app_command_line = "python /home/site/wwwroot/main.py"
+linux_fx_version = "DOCKER|mcr.microsoft.com/azure-functions/python:3.0-python3.8-appservice"
   }
 
   # Configure the custom domain and certificate
