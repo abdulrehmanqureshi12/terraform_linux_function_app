@@ -26,28 +26,54 @@ resource "azurerm_service_plan" "sp" {
   os_type = "Linux"
 }
 
-# Create Function App
-resource "azurerm_linux_function_app" "fa" {
+resource "azurerm_function_app" "function_app" {
   name                      = var.function_app_name
   location                  = var.location
-  resource_group_name       = data.azurerm_resource_group.rg.name
-  service_plan_id       = azurerm_service_plan.sp.id
-  storage_account_name      = data.azurerm_storage_account.sa.name
-  storage_account_access_key = data.azurerm_storage_account.sa.primary_access_key
-   https_only = true
-  app_settings = {
-    "WEBSITE_LOAD_CERTIFICATES" = data.azurerm_key_vault_certificate.example.id
-    FUNCTIONS_WORKER_RUNTIME    = "node"
-    CONTAINER_REGISTRY_SERVER  = azurerm_container_registry.acr.login_server
-    CONTAINER_REGISTRY_USERNAME = azurerm_container_registry.acr.admin_username
-    CONTAINER_REGISTRY_PASSWORD = azurerm_container_registry.acr.admin_password
-  }
-  
+  resource_group_name       = azurerm_resource_group.RG.name
+  app_service_plan_id       = azurerm_app_service_plan.app_service_plan.id
+  app_settings              = var.app_settings
+  storage_account_name      = azurerm_storage_account.storage_account.name
+  storage_account_access_key = azurerm_storage_account.storage_account.primary_access_key
   site_config {
-    always_on                 = true
-    https_only                = true
+    always_on = true
+    linux_fx_version = "PYTHON|3.9"
   }
-  
+
+  identity {
+    type                     = "UserAssigned"
+    identity_ids             = [azurerm_user_assigned_identity.function_app_identity.id]
+  }
+
+  # Configure HTTPS with the custom domain and certificate
+  site_config {
+    https_only       = true
+    min_tls_version  = "1.2"
+    client_cert_mode = "RequireCertificate"
+    app_command_line = "python /home/site/wwwroot/main.py"
+  }
+
+  # Configure the custom domain and certificate
+  hostname_binding {
+    hostname_type = "Verified"
+    host_name     = var.custom_domain
+    ssl_state     = "SniEnabled"
+    thumbprint    = data.azurerm_key_vault_certificate.certificate.thumbprint
+    ssl_type      = "SNI"
+    to_delete     = false
+  }
+}
+
+# Grant the identity access to the certificate in the key vault
+resource "azurerm_key_vault_access_policy" "function_app_cert_access_policy" {
+  key_vault_id = azurerm_key_vault.key_vault.id
+
+  tenant_id = data.azurerm_client_config.current.tenant_id
+
+  object_id = azurerm_user_assigned_identity.function_app_identity.principal_id
+
+  certificate_permissions = [
+    "get"
+  ]
 }
 
 data "azurerm_key_vault" "example" {
