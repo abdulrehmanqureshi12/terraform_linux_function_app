@@ -1,4 +1,3 @@
-# Define variables
 variable "resource_group_name" {
   type    = string
   default = "my-resource-group"
