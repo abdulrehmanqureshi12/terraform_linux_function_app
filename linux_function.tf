@@ -38,7 +38,10 @@ resource "azurerm_function_app" "function_app" {
     always_on = true
     linux_fx_version = "PYTHON|3.9"
   }
-
+  app_settings = {
+    "FUNCTIONS_WORKER_RUNTIME" = "python"
+    "WEBSITE_RUN_FROM_PACKAGE" = "https://github.com/Azure-Samples/functions-python-hello-world/archive/master.zip"
+  }
   identity {
     type                     = "UserAssigned"
     identity_ids             = [azurerm_user_assigned_identity.function_app_identity.id]
