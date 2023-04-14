@@ -34,32 +34,15 @@ resource "azurerm_function_app" "function_app" {
   app_settings              = var.app_settings
   storage_account_name      = azurerm_storage_account.storage_account.name
   storage_account_access_key = azurerm_storage_account.storage_account.primary_access_key
-  site_config {
-    always_on = true
-    linux_fx_version = "PYTHON|3.9"
-  }
-  app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME" = "python"
-    "WEBSITE_RUN_FROM_PACKAGE" = "https://github.com/Azure-Samples/functions-python-hello-world/archive/master.zip"
-  }
-  identity {
-    type                     = "UserAssigned"
-    identity_ids             = [azurerm_user_assigned_identity.function_app_identity.id]
+  os_type                    = "linux"
+  version                    = "~4"
+
+  app_settings {
+    FUNCTIONS_WORKER_RUNTIME = "python"
   }
 
-  # Configure HTTPS with the custom domain and certificate
   site_config {
-linux_fx_version = "DOCKER|mcr.microsoft.com/azure-functions/python:3.0-python3.8-appservice"
-  }
-
-  # Configure the custom domain and certificate
-  hostname_binding {
-    hostname_type = "Verified"
-    host_name     = var.custom_domain
-    ssl_state     = "SniEnabled"
-    thumbprint    = data.azurerm_key_vault_certificate.certificate.thumbprint
-    ssl_type      = "SNI"
-    to_delete     = false
+    linux_fx_version = "python|3.9"
   }
 }
 
