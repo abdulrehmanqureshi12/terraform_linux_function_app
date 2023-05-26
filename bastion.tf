@@ -1,18 +1,14 @@
+resource "null_resource" "recreate_bastion" {
+  depends_on = [azurerm_bastion_host.example]
+  count      = data.azurerm_bastion_host.existing_bastion.sku == "Standard" ? 1 : 0
 
-locals {
-  recreate_bastion = data.azurerm_bastion_host.existing_bastion.sku == "Standard"
-}
+  provisioner "local-exec" {
+    when    = destroy
+    command = "azurerm_bastion_host.example.destroy"
+  }
 
-resource "azurerm_bastion_host" "example" {
-  for_each            = local.recreate_bastion ? toset(["0", "0"]) : toset(["0"])
-  name                  = "shared-bastion"
-  location              = var.location
-  resource_group_name   = var.target_infra_rg
-  sku                   = "Basic"
-
-  ip_configuration {
-    name                 = "configuration"
-    subnet_id            = azurerm_subnet.example.id
-    public_ip_address_id = azurerm_public_ip.example.id
+  provisioner "local-exec" {
+    when    = create
+    command = "terraform apply -target=azurerm_bastion_host.example"
   }
 }
